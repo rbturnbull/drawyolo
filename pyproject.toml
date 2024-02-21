@@ -1,0 +1,51 @@
+[tool.poetry]
+name = "drawyolo"
+version = "0.1.0"
+description = "Draws boxes on images from annotations in YOLO format"
+authors = ["Robert Turnbull <robert.turnbull@unimelb.edu.au>"]
+license = "Apache-2.0"
+readme = "README.rst"
+repository = "https://github.com/rbturnbull/drawyolo/"
+documentation = "https://rbturnbull.github.io/drawyolo"
+homepage = "https://github.com/rbturnbull/drawyolo/"
+keywords = ["yolo", "command-line interface"]
+# For classifiers see https://pypi.org/classifiers/
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+    "Intended Audience :: Science/Research",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.12"
+typer = "^0.9.0"
+rich = "^13.7.0"
+opencv-python = "^4.9.0.80"
+
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
+ipykernel = "^6.6.1"
+coverage = "^5.5"
+autopep8 = "^1.5.7"
+Sphinx = "^4.2.0"
+nbsphinx = "^0.8.7"
+sphinx-rtd-theme = "^1.0.0"
+sphinx-autobuild = "^2021.3.14"
+pre-commit = "^2.15.0"
+sphinx-copybutton = "^0.4.0"
+black = "^21.10b0"
+sphinx-click = {git = "https://github.com/rbturnbull/sphinx-click.git"}
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = [
+    "tests",
+]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+drawyolo = "drawyolo.main:app"

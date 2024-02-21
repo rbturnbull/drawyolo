@@ -1,0 +1,5 @@
+[run]
+source = drawyolo
+
+[report]
+precision = 2
