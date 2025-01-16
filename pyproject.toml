@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "drawyolo"
-version = "0.1.0"
+version = "0.1.1"
 description = "Draws boxes on images from annotations in YOLO format"
 authors = ["Robert Turnbull <robert.turnbull@unimelb.edu.au>"]
 license = "Apache-2.0"
