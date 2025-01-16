@@ -4,7 +4,10 @@ drawyolo
 
 .. start-badges
 
-|testing badge| |coverage badge| |docs badge| |black badge|
+|pypi badge| |testing badge| |coverage badge| |docs badge| |black badge|
+
+.. |pypi badge| image:: https://img.shields.io/pypi/v/drawyolo
+    :target: https://pypi.org/project/drawyolo/
 
 .. |testing badge| image:: https://github.com/rbturnbull/drawyolo/actions/workflows/testing.yml/badge.svg
     :target: https://github.com/rbturnbull/drawyolo/actions
