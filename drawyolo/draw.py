@@ -1,7 +1,6 @@
 import cv2
 import random
 import numpy as np
-from typing import List
 from pathlib import Path
 
 
@@ -38,7 +37,7 @@ def make_colors(count:int):
     return colors
 
 
-def draw_box_on_image_with_labels(image:Path, labels:Path, output:Path, classes:List[str], colors:List[str]=None) -> np.ndarray:
+def draw_box_on_image_with_labels(image:Path, labels:Path, output:Path, classes:list[str], colors:list[str]=None) -> np.ndarray:
     """
     Adds rectangle boxes on the images.
     """

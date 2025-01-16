@@ -25,4 +25,4 @@ def drawyolo(
     elif weights is not None:
         draw_box_on_image_with_model(image, weights, output, classes=classes, highest=highest)
     else:
-        print("Please provide either labels or a model")
+        raise typer.BadParameter("You must provide either --labels or --weights.")
