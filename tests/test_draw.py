@@ -36,6 +36,39 @@ def test_draw_box_on_image_with_labels(tmp_path):
     assert result_image is not None
 
 
+def test_draw_box_on_image_with_labels_width(tmp_path):
+    output = tmp_path / "output.jpg"
+    draw_box_on_image_with_labels(IMAGE, LABELS, output, ["eye", "ear"], width=100)
+    assert output.exists()
+    result_image = cv2.imread(str(output))
+    height, width = result_image.shape[:2]
+    assert width == 100
+    assert height == 100
+    assert result_image is not None
+
+
+def test_draw_box_on_image_with_labels_height(tmp_path):
+    output = tmp_path / "output.jpg"
+    draw_box_on_image_with_labels(IMAGE, LABELS, output, ["eye", "ear"], height=140)
+    assert output.exists()
+    result_image = cv2.imread(str(output))
+    height, width = result_image.shape[:2]
+    assert width == 140
+    assert height == 140
+    assert result_image is not None
+
+
+def test_draw_box_on_image_with_labels_width_height(tmp_path):
+    output = tmp_path / "output.jpg"
+    draw_box_on_image_with_labels(IMAGE, LABELS, output, ["eye", "ear"], width=100, height=140)
+    assert output.exists()
+    result_image = cv2.imread(str(output))
+    height, width = result_image.shape[:2]
+    assert width == 100
+    assert height == 140
+    assert result_image is not None
+
+
 def test_draw_box_on_image_with_labels_fail(tmp_path):
     output = tmp_path / "output.jpg"
     draw_box_on_image_with_labels('x.jpg', LABELS, output, ["eye", "ear"])

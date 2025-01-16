@@ -74,6 +74,20 @@ That will create an image like this:
     :alt: Output image
     :align: center
 
+To resize the image, use the ``--width`` and/or ``--height`` options. 
+The aspect ratio will be preserved if you do not set both ``--width`` and ``--height``.
+
+For example:
+
+.. code-block:: bash
+
+    drawyolo tests/test-data/terrier.webp tests/test-data/output-thumbnail.jpg --labels tests/test-data/labels.txt --classes eye,ear --width 240
+
+.. image:: https://raw.githubusercontent.com/rbturnbull/drawyolo/main/tests/test-data/output-thumbnail.jpg
+    :alt: Output image thumbnail
+    :align: center
+
+The thickness of the line will be set according to the final size of the image. You can change the thickness with the ``--line-thickness`` option.
 
 Drawing boxes from a YOLO model
 ==================================
@@ -84,6 +98,7 @@ If you have a YOLO model with weights, you can draw the boxes on an image like t
 
     drawyolo image.jpg output.jpg --weights model.pt
 
+You can also resize the image as before with the ``--width`` and ``--height`` options.
 
 Advanced usage
 ==================================
