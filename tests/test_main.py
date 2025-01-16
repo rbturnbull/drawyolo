@@ -1,3 +1,4 @@
+import re
 from typer.testing import CliRunner
 from drawyolo.main import app
 from unittest.mock import patch
@@ -48,5 +49,6 @@ def test_main_error(tmp_path):
     ])
 
     assert result.exit_code == 2
-    assert "You must provide either --labels or --weights." in result.stdout
+    ansi_escape = re.compile(r'\x1b\[([0-9;]*[a-zA-Z])')
+    assert "You must provide either --labels or --weights." in re.sub(ansi_escape, '', result.stdout)
     assert not output.exists()
