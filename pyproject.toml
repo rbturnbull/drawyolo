@@ -23,7 +23,7 @@ rich = ">=13.7.0"
 opencv-python = ">=4.9.0.80"
 ultralytics = "^8.2.23"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = ">=6.2.5"
 ipykernel = ">=6.6.1"
 coverage = ">=5.5"
