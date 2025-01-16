@@ -17,8 +17,6 @@ Draws boxes on images from annotations in YOLO format
    :caption: Contents:
 
    quickstart
-   api
-   cli
    credits
 
 Indices and tables
