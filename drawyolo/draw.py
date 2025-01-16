@@ -27,7 +27,7 @@ def make_colors(count:int):
               for _ in range(count)]
     return colors
 
-def draw_box_on_image(image:Path, labels:Path, output:Path, classes:List[str], colors:List[str]=None):
+def draw_box_on_image_with_labels(image:Path, labels:Path, output:Path, classes:List[str], colors:List[str]=None):
     """
     Adds rectangle boxes on the images.
     """
@@ -68,3 +68,48 @@ def draw_box_on_image(image:Path, labels:Path, output:Path, classes:List[str], c
     cv2.imwrite(str(output), image)
 
 
+def draw_box_on_image_with_model(image:Path, weights:Path, output:Path, res:int=1280, classes:list[str]=None, colors:list[str]=None, highest:bool=False):
+    from ultralytics import YOLO
+
+    model = YOLO(str(weights))
+
+    res = res or 1280
+
+    results = model.predict(source=[image], show=False, save=False, imgsz=res)
+
+    assert len(results) == 1
+    predictions = results[0]
+
+    output.parent.mkdir(exist_ok=True, parents=True)
+
+    classes = classes or model.names
+    colors = colors or make_colors(len(classes))
+
+    image = cv2.imread(str(image))
+
+    boxes_list = predictions.boxes
+    if highest:
+        best_confidence = 0
+        best_boxes = None
+        for boxes in boxes_list:
+            confidence = boxes.conf.item()
+            if confidence > best_confidence:
+                best_boxes = boxes
+                best_confidence = confidence
+        boxes_list = [best_boxes]
+
+    for boxes in boxes_list:
+        class_idx = boxes.cls[0].int().item()
+        xyxy = boxes.xyxy.cpu()[0]
+        plot_one_box(
+            xyxy, 
+            image, 
+            color=colors[class_idx],
+            label=classes[class_idx], 
+            line_thickness=None,
+        )
+
+    # Save Output
+    output = Path(output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    cv2.imwrite(str(output), image)

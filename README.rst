@@ -17,9 +17,6 @@ drawyolo
     
 .. |coverage badge| image:: https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/rbturnbull/4824a2c398904709e901d0b7e8269d4b/raw/coverage-badge.json
     :target: https://rbturnbull.github.io/drawyolo/coverage/
-
-.. |torchapp badge| image:: https://img.shields.io/badge/MLOpps-torchapp-B1230A.svg
-    :target: https://rbturnbull.github.io/torchapp/
     
 .. end-badges
 
@@ -40,17 +37,12 @@ Install using pip:
 Usage
 ==================================
 
-See the options for training a model with the command:
+See the options with the command:
 
 .. code-block:: bash
 
-    drawyolo train --help
+    drawyolo --help
 
-See the options for making inferences with the command:
-
-.. code-block:: bash
-
-    drawyolo infer --help
 
 .. end-quickstart
 
@@ -62,8 +54,6 @@ Credits
 
 Robert Turnbull
 For more information contact: <robert.turnbull@unimelb.edu.au>
-
-Created using torchapp (https://github.com/rbturnbull/torchapp).
 
 .. end-credits
 
