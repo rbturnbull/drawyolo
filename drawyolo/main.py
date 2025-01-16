@@ -7,15 +7,15 @@ app = typer.Typer()
 
 @app.command()
 def drawyolo(
-    image: Path, 
-    output: Path,
-    labels: Path=None, 
-    weights: Path=None, 
-    classes:str=None,
-    highest:bool=False,
+    image: Path=typer.Argument(..., help="Input image path"),
+    output: Path=typer.Argument(..., help="Output image path"),
+    labels: Path=typer.Option(None, help="Path to labels text file in YOLO format"),
+    weights: Path=typer.Option(None, help="Path to YOLO model weights file if not using labels text file"),
+    classes:str=typer.Option(None, help="Class names separated by comma"),
+    highest:bool=typer.Option(False, help="Only draw the box with the highest confidence"),
 ):
     """
-    Draw boxes on image
+    Draw boxes on image from a YOLO model or labels text file in YOLO format.
     """
     if classes is not None:
         classes = classes.split(',')

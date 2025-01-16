@@ -1,12 +1,21 @@
 import cv2
 import random
+import numpy as np
 from typing import List
 from pathlib import Path
 
 
+def save_image(image:np.ndarray, output:str|Path|None):
+    """ Save image to file """
+    if output:
+        output = Path(output)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        cv2.imwrite(str(output), image)
 
-def plot_one_box(x, image, color=None, label=None, line_thickness=None):
-    # Plots one bounding box on image img
+
+def plot_one_box(x, image, color=None, label:str=None, line_thickness=None):
+    """ Plots one bounding box on image img """
+
     tl = line_thickness or round(
         0.002 * (image.shape[0] + image.shape[1]) / 2) + 1  # line/font thickness
     color = color or [random.randint(0, 255) for _ in range(3)]
@@ -22,12 +31,14 @@ def plot_one_box(x, image, color=None, label=None, line_thickness=None):
 
 
 def make_colors(count:int):
+    """ Generate random colors """
     random.seed(42)
     colors = [[random.randint(0, 255) for _ in range(3)]
               for _ in range(count)]
     return colors
 
-def draw_box_on_image_with_labels(image:Path, labels:Path, output:Path, classes:List[str], colors:List[str]=None):
+
+def draw_box_on_image_with_labels(image:Path, labels:Path, output:Path, classes:List[str], colors:List[str]=None) -> np.ndarray:
     """
     Adds rectangle boxes on the images.
     """
@@ -62,32 +73,16 @@ def draw_box_on_image_with_labels(image:Path, labels:Path, output:Path, classes:
             line_thickness=None,
         )
     
-    # Save Output
-    output = Path(output)
-    output.parent.mkdir(parents=True, exist_ok=True)
-    cv2.imwrite(str(output), image)
+    save_image(image, output)
+    return image
 
 
-def draw_box_on_image_with_model(image:Path, weights:Path, output:Path, res:int=1280, classes:list[str]=None, colors:list[str]=None, highest:bool=False):
-    from ultralytics import YOLO
-
-    model = YOLO(str(weights))
-
-    res = res or 1280
-
-    results = model.predict(source=[image], show=False, save=False, imgsz=res)
-
-    assert len(results) == 1
-    predictions = results[0]
-
-    output.parent.mkdir(exist_ok=True, parents=True)
-
-    classes = classes or model.names
+def draw_box_on_image_with_yolo_result(image:Path, results, output:Path, classes:list[str]=None, colors:list[str]=None, highest:bool=False) -> np.ndarray:
     colors = colors or make_colors(len(classes))
 
     image = cv2.imread(str(image))
 
-    boxes_list = predictions.boxes
+    boxes_list = results.boxes
     if highest:
         best_confidence = 0
         best_boxes = None
@@ -109,7 +104,20 @@ def draw_box_on_image_with_model(image:Path, weights:Path, output:Path, res:int=
             line_thickness=None,
         )
 
-    # Save Output
-    output = Path(output)
-    output.parent.mkdir(parents=True, exist_ok=True)
-    cv2.imwrite(str(output), image)
+    save_image(image, output)
+    return image
+
+
+def draw_box_on_image_with_model(image:Path, weights:Path|str, output:Path, res:int=1280, classes:list[str]=None, colors:list[str]=None, highest:bool=False) -> np.ndarray:
+    """ Draw boxes on image using YOLO model """
+    from ultralytics import YOLO
+
+    model = YOLO(str(weights))
+
+    res = res or 1280
+    classes = classes or model.names
+
+    results = model.predict(source=[image], show=False, save=False, imgsz=res)
+    assert len(results) == 1
+
+    return draw_box_on_image_with_yolo_result(image, results[0], output, classes, colors, highest)
