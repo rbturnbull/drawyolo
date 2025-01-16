@@ -45,7 +45,6 @@ def draw_box_on_image(image:Path, labels:Path, output:Path, classes:List[str], c
     labels = Path(labels)
     labels = labels.read_text().strip().split("\n") if labels.exists() else []
     for line in labels:
-        print(line)
         staff = line.split()
         class_idx = int(staff[0])
 
