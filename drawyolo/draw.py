@@ -3,31 +3,25 @@ import random
 import numpy as np
 from pathlib import Path
 
+FONT = cv2.FONT_HERSHEY_SIMPLEX
 
-def rescale_sizes(
-    original_width: int,
-    original_height: int,
-    width: int | None = None,
-    height: int | None = None,
-) -> tuple[int, int]:
-    """
-    The size of the image after rescaling.
+def get_font_scale(height) -> float:
+    target_height = min(max(0.03 * height, 10), 100)  # Limit to 10-100 pixels
+    text = "Hg"
+    low, high = 0.01, 10  # Start with a wide range
+    best_fontScale = low
 
-    - If both `width` and `height` are None or 0, return the original image.
-    - If only one is provided, rescale while maintaining the aspect ratio.
-    - If both are provided, rescale to the exact size (ignoring aspect ratio).
-    """
-    if not width and not height:
-        return original_height, original_width
+    while high - low > 0.01:  # Precision threshold
+        mid = (low + high) / 2
+        (_, text_height), _ = cv2.getTextSize(text, FONT, mid, thickness=1)
 
-    if not width:
-        scale = height / original_height
-        width = int(original_width * scale)
-    elif not height:
-        scale = width / original_width
-        height = int(original_height * scale)
+        if text_height < target_height:
+            best_fontScale = mid  # Update best found value
+            low = mid  # Increase font scale
+        else:
+            high = mid  # Decrease font scale
 
-    return width, height
+    return best_fontScale
 
 
 def rescale_image(
@@ -43,46 +37,35 @@ def rescale_image(
         return image
 
     original_height, original_width = image.shape[:2]
-    width, height = rescale_sizes(original_width, original_height, width, height)
+    if not width:
+        scale = height / original_height
+        width = int(original_width * scale)
+    elif not height:
+        scale = width / original_width
+        height = int(original_height * scale)
+
     return cv2.resize(image, (width, height), interpolation=cv2.INTER_AREA)
 
 
 def save_image(
     image: np.ndarray,
     output: str | Path | None,
-    width: int | None = None,
-    height: int | None = None,
 ):
     """Save image to file"""
     if output:
         output = Path(output)
         output.parent.mkdir(parents=True, exist_ok=True)
-        image = rescale_image(image, width, height)
         cv2.imwrite(str(output), image)
 
 
 def default_line_thickness(width: int, height: int) -> int:
-    return round(0.002 * (height + width) / 2) + 1
-
-
-def default_line_thickness_before_rescale(
-    original_width: int,
-    original_height: int,
-    width: int | None = None,
-    height: int | None = None,
-) -> int:
-    original_thickness_no_rescale = default_line_thickness(
-        original_width, original_height
-    )
-    final_width, final_height = rescale_sizes(
-        original_width, original_height, width, height
-    )
-    final_thickness = default_line_thickness(final_width, final_height)
-    return round(original_thickness_no_rescale**2 / final_thickness)
+    return max(round(0.002 * min(height,width)),2)
 
 
 def plot_one_box(
-    x, image, color=None, label: str = None, line_thickness: int | None = None
+    x, image, color=None, label: str = None, 
+    line_thickness: int | None = None,
+    font_scale:float|None = None,
 ):
     """Plots one bounding box on image img"""
     line_thickness = line_thickness or default_line_thickness(
@@ -91,21 +74,21 @@ def plot_one_box(
     color = color or [random.randint(0, 255) for _ in range(3)]
     c1, c2 = (int(x[0]), int(x[1])), (int(x[2]), int(x[3]))
     cv2.rectangle(image, c1, c2, color, thickness=line_thickness, lineType=cv2.LINE_AA)
+    font_scale = font_scale or get_font_scale(image.shape[0])
     if label:
-        tf = max(line_thickness - 1, 1)  # font thickness
-        t_size = cv2.getTextSize(label, 0, fontScale=line_thickness / 3, thickness=tf)[
-            0
-        ]
-        c2 = c1[0] + t_size[0], c1[1] - t_size[1] - 3
+        label = str(label).upper()
+        t_size = cv2.getTextSize(label, FONT, fontScale=font_scale, thickness=1)[0]
+        font_thickness = max(round(t_size[1] * 0.08), 1)
+        c2 = c1[0] + t_size[0], c1[1] - round(t_size[1] * 1.1) - font_thickness * 2
         cv2.rectangle(image, c1, c2, color, -1, cv2.LINE_AA)  # filled
         cv2.putText(
             image,
             label,
-            (c1[0], c1[1] - 2),
-            0,
-            line_thickness / 3,
+            (c1[0], c1[1] - round(0.05 * t_size[1]) - font_thickness),
+            FONT,
+            font_scale,
             [225, 255, 255],
-            thickness=tf,
+            thickness=font_thickness,
             lineType=cv2.LINE_AA,
         )
 
@@ -135,14 +118,14 @@ def draw_box_on_image_with_labels(
     # Read image
     try:
         image = cv2.imread(str(image))
-        original_height, original_width = image.shape[:2]
+        image = rescale_image(image, width, height)
+        height, width = image.shape[:2]        
     except Exception as e:
         print(f"Cannot read image: {e}")
         return
 
-    line_thickness = line_thickness or default_line_thickness_before_rescale(
-        original_width, original_height, width, height
-    )
+    line_thickness = line_thickness or default_line_thickness(width, height)
+    font_scale = get_font_scale(height)
 
     # Get Labels
     labels = Path(labels)
@@ -152,10 +135,10 @@ def draw_box_on_image_with_labels(
         class_idx = int(staff[0])
 
         x_center, y_center, w, h = (
-            float(staff[1]) * original_width,
-            float(staff[2]) * original_height,
-            float(staff[3]) * original_width,
-            float(staff[4]) * original_height,
+            float(staff[1]) * width,
+            float(staff[2]) * height,
+            float(staff[3]) * width,
+            float(staff[4]) * height,
         )
         x1 = round(x_center - w / 2)
         y1 = round(y_center - h / 2)
@@ -168,9 +151,10 @@ def draw_box_on_image_with_labels(
             color=colors[class_idx],
             label=classes[class_idx],
             line_thickness=line_thickness,
+            font_scale=font_scale,
         )
 
-    save_image(image, output, width=width, height=height)
+    save_image(image, output)
     return image
 
 
@@ -201,22 +185,29 @@ def draw_box_on_image_with_yolo_result(
         boxes_list = [best_boxes]
 
     original_height, original_width = image.shape[:2]
-    line_thickness = line_thickness or default_line_thickness_before_rescale(
-        original_width, original_height, width, height
-    )
+    image = rescale_image(image, width, height)
+    height, width = image.shape[:2]
+
+    font_scale = get_font_scale(height)
+    line_thickness = line_thickness or default_line_thickness(width, height)
 
     for boxes in boxes_list:
         class_idx = boxes.cls[0].int().item()
-        xyxy = boxes.xyxy.cpu()[0]
+        xyxy = boxes.xyxy.cpu()[0].clone().detach().numpy()
+        xyxy[0] = xyxy[0] * width / original_width
+        xyxy[1] = xyxy[1] * height / original_height
+        xyxy[2] = xyxy[2] * width / original_width
+        xyxy[3] = xyxy[3] * height / original_height
         plot_one_box(
             xyxy,
             image,
             color=colors[class_idx],
             label=classes[class_idx],
             line_thickness=line_thickness,
+            font_scale=font_scale,
         )
 
-    save_image(image, output, width, height)
+    save_image(image, output)
     return image
 
 
